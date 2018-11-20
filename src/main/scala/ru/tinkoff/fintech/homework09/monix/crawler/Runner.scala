@@ -1,13 +1,13 @@
 package ru.tinkoff.fintech.homework09.monix.crawler
 
 import monix.eval.{Fiber, Task}
-import monix.execution.AsyncQueue
+
 import monix.execution.Scheduler.Implicits.global
-import cats.implicits._
+
 import scala.concurrent.duration._
 
 import scala.concurrent.Await
-import ru.tinkoff.fintech.homework09.answers.monix.{Worker => AWorker}
+
 
 
 object Runner extends App {
@@ -22,9 +22,7 @@ object Runner extends App {
     )
   }
 
-  val parser: Parsr = new Parsr {
-    override def links(page: Body): List[Url] = page
-  }
+  val parser: Parsr = (page: Body) => page
 
   println(
     Await.result(new CrawlRoutines(http, parser).crawl(url("host0", "path0")).runToFuture, 10 seconds)

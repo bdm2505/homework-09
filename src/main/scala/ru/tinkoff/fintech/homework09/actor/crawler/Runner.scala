@@ -15,9 +15,7 @@ object Runner extends App {
     )
   }
 
-  val parser: Parsr = new Parsr {
-    override def links(page: Body): List[Url] = page
-  }
+  val parser: Parsr = (page: Body) => page
 
   def wrkFactory(manager: ActorRef): Props = Props(new Worker(http, parser, manager))
 

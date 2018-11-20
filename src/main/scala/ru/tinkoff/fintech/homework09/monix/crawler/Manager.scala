@@ -1,11 +1,9 @@
 package ru.tinkoff.fintech.homework09.monix.crawler
-import monix.eval.Task
+
 import monix.eval.{Fiber, Task}
-import monix.execution.AsyncQueue
+
 import monix.execution.Scheduler.Implicits.global
 import cats.implicits._
-import scala.concurrent.duration._
-import ru.tinkoff.fintech.homework09.answers.monix.{Worker => AWorker}
 
 trait Manager {
   self: Worker =>
@@ -27,26 +25,22 @@ trait Manager {
 
     def crawlUrl(data: CrawlerData, url: Url): Task[CrawlerData] = {
       if (!data.visitedLinks.contains(url)) {
-        workerFor(data, url.host).flatMap {
+        workerFor(data, url).flatMap {
           case (data2, workerQueue) =>
             workerQueue.offer(url).map { _ =>
               data2.copy(
-                visitedLinks = data.visitedLinks + url,
-                inProgress = data.inProgress + url
+                visitedLinks = data2.visitedLinks + url,
+                inProgress = data2.inProgress + url
               )
             }
         }
       } else Task.now(data)
     }
 
-    def workerFor(data: CrawlerData, host: Host): Task[(CrawlerData, MQueue[Url])] = {
-      data.workers.get(host) match {
-        case None =>
-          val workerQueue = MQueue.make[Url]
-          worker(workerQueue, crawlerQueue).map { workerFiber =>
-            (data.copy(workers = data.workers + (host -> WorkerData(workerQueue, workerFiber))), workerQueue)
-          }
-        case Some(wd) => Task.now((data, wd.queue))
+    def workerFor(data: CrawlerData, url: Url): Task[(CrawlerData, MQueue[Url])] = {
+      val workerQueue = MQueue.make[Url]
+      worker(workerQueue, crawlerQueue).map { workerFiber =>
+        (data.copy(workers = data.workers + (url -> WorkerData(workerQueue, workerFiber))), workerQueue)
       }
     }
 
