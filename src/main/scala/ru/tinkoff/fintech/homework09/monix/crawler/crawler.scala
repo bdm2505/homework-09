@@ -18,7 +18,7 @@ package object crawler {
 
   case class WorkerData(queue: MQueue[Url], fiber: Fiber[Unit])
 
-  case class CrawlerData(referenceCount: Map[Host, Int], visitedLinks: Set[Url], inProgress: Set[Url], workers: Map[Url, WorkerData])
+  case class CrawlerData(referenceCount: Map[Host, Int], visitedLinks: Set[Url], inProgress: Set[Url], workers: Map[Host, WorkerData])
 
   sealed trait CrawlerMessage
 
@@ -30,8 +30,6 @@ package object crawler {
   case class CrawlResult(url: Url, links: List[Url]) extends CrawlerMessage
 
   class MQueue[T](q: AsyncQueue[T]) {
-
-    var map: Map[T, Int] = Map.empty
 
     def take: Task[T] = {
       Task.deferFuture(q.poll())
