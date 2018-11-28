@@ -25,5 +25,6 @@ package object crawler {
 
   sealed trait WorkerMessage
   case class Crawl(url: Url) extends WorkerMessage
+  case class Result(url: Url, links: List[Url]) extends WorkerMessage
 
 }
